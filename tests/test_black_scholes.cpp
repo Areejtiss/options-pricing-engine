@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <initializer_list>
+#include <limits>
 #include <stdexcept>
 #include <string>
 
@@ -55,6 +57,53 @@ void expect_invalid_argument(
     }
 }
 
+// Test NaN, positive infinity and negative infinity
+// for every option parameter, for both call and put pricing.
+void test_non_finite_inputs() {
+    const double nan = std::numeric_limits<double>::quiet_NaN();
+    const double infinity = std::numeric_limits<double>::infinity();
+
+    const quant::OptionParameters base{
+        100.0, 100.0, 1.0, 0.05, 0.20
+    };
+
+    for (int parameter = 0; parameter < 5; ++parameter) {
+        for (double invalid_value : {nan, infinity, -infinity}) {
+            auto option = base;
+
+            switch (parameter) {
+                case 0:
+                    option.spot = invalid_value;
+                    break;
+                case 1:
+                    option.strike = invalid_value;
+                    break;
+                case 2:
+                    option.maturity = invalid_value;
+                    break;
+                case 3:
+                    option.risk_free_rate = invalid_value;
+                    break;
+                case 4:
+                    option.volatility = invalid_value;
+                    break;
+            }
+
+            const std::string name =
+                "Reject non-finite parameter " +
+                std::to_string(parameter);
+
+            expect_invalid_argument(name + " (call)", [&] {
+                quant::call_price(option);
+            });
+
+            expect_invalid_argument(name + " (put)", [&] {
+                quant::put_price(option);
+            });
+        }
+    }
+}
+
 } // namespace
 
 int main() {
@@ -65,7 +114,8 @@ int main() {
     const double call = quant::call_price(option);
     const double put = quant::put_price(option);
     const double discounted_strike =
-        option.strike * std::exp(-option.risk_free_rate * option.maturity);
+        option.strike *
+        std::exp(-option.risk_free_rate * option.maturity);
 
     // 1. Known reference prices
     expect_near("Black-Scholes call price", call, 10.4506);
@@ -83,29 +133,35 @@ int main() {
         "Call price is non-negative",
         call >= 0.0
     );
+
     expect_true(
         "Call price does not exceed spot",
         call <= option.spot
     );
+
     expect_true(
         "Call price respects its lower bound",
         call >= std::max(option.spot - discounted_strike, 0.0) - 0.0001
     );
+
     expect_true(
         "Put price is non-negative",
         put >= 0.0
     );
+
     expect_true(
         "Put price does not exceed discounted strike",
         put <= discounted_strike
     );
+
     expect_true(
         "Put price respects its lower bound",
         put >= std::max(discounted_strike - option.spot, 0.0) - 0.0001
     );
 
-    // 4. Invalid inputs must throw std::invalid_argument
+    // 4. Invalid inputs: zero and negative values
     auto invalid = option;
+
     invalid.spot = 0.0;
     expect_invalid_argument("Reject zero spot", [&] {
         quant::call_price(invalid);
@@ -153,6 +209,10 @@ int main() {
         quant::put_price(invalid);
     });
 
+    // 5. Non-finite inputs: NaN, +infinity and -infinity
+    test_non_finite_inputs();
+
+    // Final test result
     if (failures > 0) {
         std::cerr << failures << " test(s) failed.\n";
         return 1;

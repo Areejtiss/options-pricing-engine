@@ -10,7 +10,18 @@ double normal_cdf(double x) {
     return 0.5 * std::erfc(-x / std::sqrt(2.0));
 }
 
+
 void validate(const OptionParameters& option) {
+    if (!std::isfinite(option.spot) ||
+        !std::isfinite(option.strike) ||
+        !std::isfinite(option.maturity) ||
+        !std::isfinite(option.risk_free_rate) ||
+        !std::isfinite(option.volatility)) {
+        throw std::invalid_argument(
+            "All option parameters must be finite."
+        );
+    }
+
     if (option.spot <= 0.0 ||
         option.strike <= 0.0 ||
         option.maturity <= 0.0 ||
@@ -20,6 +31,7 @@ void validate(const OptionParameters& option) {
         );
     }
 }
+
 
 double d1(const OptionParameters& option) {
     return (
