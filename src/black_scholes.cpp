@@ -66,5 +66,14 @@ double put_price(const OptionParameters& option) {
                normal_cdf(-d2(option)) -
            option.spot * normal_cdf(-d1(option));
 }
+double call_delta(const OptionParameters& option) {
+    validate(option);
+    return normal_cdf(d1(option));
+}
+
+double put_delta(const OptionParameters& option) {
+    validate(option);
+    return normal_cdf(d1(option)) - 1.0;
+}
 
 } // namespace quant
