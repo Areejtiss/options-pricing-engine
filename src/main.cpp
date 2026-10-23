@@ -1,11 +1,27 @@
 #include "black_scholes.hpp"
-#include "greeks.hpp"
+#include "option.hpp"
 
 #include <iomanip>
 #include <iostream>
 
+namespace {
+
+void print_option(const char* name, const quant::EuropeanOption& option) {
+    const quant::Greeks greeks = option.greeks();
+
+    std::cout << name << '\n';
+    std::cout << "  Price: " << option.price() << '\n';
+    std::cout << "  Delta: " << greeks.delta << '\n';
+    std::cout << "  Gamma: " << greeks.gamma << '\n';
+    std::cout << "  Vega:  " << greeks.vega << '\n';
+    std::cout << "  Theta: " << greeks.theta << '\n';
+    std::cout << "  Rho:   " << greeks.rho << '\n';
+}
+
+} // namespace
+
 int main() {
-    const quant::OptionParameters option{
+    const quant::OptionParameters parameters{
         100.0,  // Spot price
         100.0,  // Strike price
         1.0,    // One year to maturity
@@ -13,21 +29,14 @@ int main() {
         0.20    // 20% annual volatility
     };
 
+    const quant::EuropeanOption call(quant::OptionType::Call, parameters);
+    const quant::EuropeanOption put(quant::OptionType::Put, parameters);
+
     std::cout << std::fixed << std::setprecision(4);
 
-    std::cout << "Black-Scholes European Option Pricer\n";
-    std::cout << "Call price: " << quant::call_price(option) << '\n';
-    std::cout << "Put price:  " << quant::put_price(option) << '\n';
-
-    std::cout << "\nGreeks\n";
-    std::cout << "Call delta: " << quant::call_delta(option) << '\n';
-    std::cout << "Put delta:  " << quant::put_delta(option) << '\n';
-    std::cout << "Gamma:      " << quant::gamma(option) << '\n';
-    std::cout << "Vega:       " << quant::vega(option) << '\n';
-    std::cout << "Call theta: " << quant::call_theta(option) << '\n';
-    std::cout << "Put theta:  " << quant::put_theta(option) << '\n';
-    std::cout << "Call rho:   " << quant::call_rho(option) << '\n';
-    std::cout << "Put rho:    " << quant::put_rho(option) << '\n';
+    std::cout << "Black-Scholes European Option Pricer\n\n";
+    print_option("Call", call);
+    print_option("Put", put);
 
     return 0;
 }

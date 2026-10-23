@@ -13,6 +13,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(quant STATIC
     src/black_scholes.cpp
     src/greeks.cpp
+    src/option.cpp
+    src/payoff.cpp
 )
 
 target_include_directories(quant
@@ -48,4 +50,26 @@ target_link_libraries(greeks_tests PRIVATE quant)
 add_test(
     NAME GreeksTests
     COMMAND greeks_tests
+)
+
+add_executable(payoff_tests
+    tests/test_payoff.cpp
+)
+
+target_link_libraries(payoff_tests PRIVATE quant)
+
+add_test(
+    NAME PayoffTests
+    COMMAND payoff_tests
+)
+
+add_executable(option_tests
+    tests/test_option.cpp
+)
+
+target_link_libraries(option_tests PRIVATE quant)
+
+add_test(
+    NAME OptionTests
+    COMMAND option_tests
 )
