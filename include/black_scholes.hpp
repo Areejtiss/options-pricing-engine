@@ -1,4 +1,3 @@
-
 #pragma once
 
 namespace quant {
@@ -13,8 +12,5 @@ struct OptionParameters {
 
 double call_price(const OptionParameters& option);
 double put_price(const OptionParameters& option);
-
-double call_delta(const OptionParameters& option);
-double put_delta(const OptionParameters& option);
 
 } // namespace quant

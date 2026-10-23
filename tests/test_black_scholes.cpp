@@ -209,51 +209,7 @@ int main() {
         quant::put_price(invalid);
     });
 
-    // 5. Option Delta calculations
-    const double call_delta = quant::call_delta(option);
-    const double put_delta = quant::put_delta(option);
-
-    expect_near(
-        "Call Delta reference value",
-        call_delta,
-        0.636830651
-    );
-
-    expect_near(
-        "Put Delta reference value",
-        put_delta,
-        -0.363169349
-    );
-
-    expect_near(
-        "Call-put Delta relationship",
-        call_delta - put_delta,
-        1.0
-    );
-
-    expect_true(
-        "Call Delta is between zero and one",
-        call_delta > 0.0 && call_delta < 1.0
-    );
-
-    expect_true(
-        "Put Delta is between minus one and zero",
-        put_delta > -1.0 && put_delta < 0.0
-    );
-
-    invalid = option;
-    invalid.volatility = 0.0;
-    expect_invalid_argument("Call Delta rejects zero volatility", [&] {
-        quant::call_delta(invalid);
-    });
-
-    invalid = option;
-    invalid.spot = std::numeric_limits<double>::infinity();
-    expect_invalid_argument("Put Delta rejects infinite spot", [&] {
-        quant::put_delta(invalid);
-    });
-
-    // 6. Non-finite inputs: NaN, +infinity and -infinity
+    // 5. Non-finite inputs: NaN, +infinity and -infinity
     test_non_finite_inputs();
 
     // Final test result

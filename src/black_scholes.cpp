@@ -1,79 +1,23 @@
 #include "black_scholes.hpp"
 
-#include <cmath>
-#include <stdexcept>
+#include "bs_common.hpp"
 
 namespace quant {
-namespace {
-
-double normal_cdf(double x) {
-    return 0.5 * std::erfc(-x / std::sqrt(2.0));
-}
-
-
-void validate(const OptionParameters& option) {
-    if (!std::isfinite(option.spot) ||
-        !std::isfinite(option.strike) ||
-        !std::isfinite(option.maturity) ||
-        !std::isfinite(option.risk_free_rate) ||
-        !std::isfinite(option.volatility)) {
-        throw std::invalid_argument(
-            "All option parameters must be finite."
-        );
-    }
-
-    if (option.spot <= 0.0 ||
-        option.strike <= 0.0 ||
-        option.maturity <= 0.0 ||
-        option.volatility <= 0.0) {
-        throw std::invalid_argument(
-            "Spot, strike, maturity and volatility must be positive."
-        );
-    }
-}
-
-
-double d1(const OptionParameters& option) {
-    return (
-        std::log(option.spot / option.strike) +
-        (option.risk_free_rate +
-         0.5 * option.volatility * option.volatility) *
-            option.maturity
-    ) / (option.volatility * std::sqrt(option.maturity));
-}
-
-double d2(const OptionParameters& option) {
-    return d1(option) -
-           option.volatility * std::sqrt(option.maturity);
-}
-
-} // namespace
 
 double call_price(const OptionParameters& option) {
-    validate(option);
+    detail::validate(option);
 
-    return option.spot * normal_cdf(d1(option)) -
-           option.strike *
-               std::exp(-option.risk_free_rate * option.maturity) *
-               normal_cdf(d2(option));
+    return option.spot * detail::normal_cdf(detail::d1(option)) -
+           option.strike * detail::discount_factor(option) *
+               detail::normal_cdf(detail::d2(option));
 }
 
 double put_price(const OptionParameters& option) {
-    validate(option);
+    detail::validate(option);
 
-    return option.strike *
-               std::exp(-option.risk_free_rate * option.maturity) *
-               normal_cdf(-d2(option)) -
-           option.spot * normal_cdf(-d1(option));
-}
-double call_delta(const OptionParameters& option) {
-    validate(option);
-    return normal_cdf(d1(option));
-}
-
-double put_delta(const OptionParameters& option) {
-    validate(option);
-    return normal_cdf(d1(option)) - 1.0;
+    return option.strike * detail::discount_factor(option) *
+               detail::normal_cdf(-detail::d2(option)) -
+           option.spot * detail::normal_cdf(-detail::d1(option));
 }
 
 } // namespace quant
