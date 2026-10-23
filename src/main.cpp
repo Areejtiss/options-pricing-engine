@@ -1,6 +1,8 @@
 #include "black_scholes.hpp"
+#include "monte_carlo.hpp"
 #include "option.hpp"
 
+#include <initializer_list>
 #include <iomanip>
 #include <iostream>
 
@@ -37,6 +39,17 @@ int main() {
     std::cout << "Black-Scholes European Option Pricer\n\n";
     print_option("Call", call);
     print_option("Put", put);
+
+    std::cout << "\nMonte Carlo (100,000 paths, antithetic)\n";
+    for (const auto* option : {&call, &put}) {
+        const quant::MonteCarloResult result =
+            quant::monte_carlo_price(*option);
+        std::cout << (option->type() == quant::OptionType::Call
+                          ? "  Call: "
+                          : "  Put:  ")
+                  << result.price << " +/- " << result.standard_error
+                  << "  (Black-Scholes " << option->price() << ")\n";
+    }
 
     return 0;
 }
