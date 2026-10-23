@@ -13,6 +13,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(quant STATIC
     src/black_scholes.cpp
     src/greeks.cpp
+    src/monte_carlo.cpp
     src/option.cpp
     src/payoff.cpp
 )
@@ -72,4 +73,15 @@ target_link_libraries(option_tests PRIVATE quant)
 add_test(
     NAME OptionTests
     COMMAND option_tests
+)
+
+add_executable(monte_carlo_tests
+    tests/test_monte_carlo.cpp
+)
+
+target_link_libraries(monte_carlo_tests PRIVATE quant)
+
+add_test(
+    NAME MonteCarloTests
+    COMMAND monte_carlo_tests
 )

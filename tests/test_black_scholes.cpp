@@ -1,5 +1,6 @@
 
 #include "black_scholes.hpp"
+#include "test_helpers.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -11,51 +12,9 @@
 
 namespace {
 
-int failures = 0;
-
-void expect_near(
-    const std::string& test_name,
-    double actual,
-    double expected,
-    double tolerance = 0.0001
-) {
-    if (std::abs(actual - expected) > tolerance) {
-        std::cerr << "[FAIL] " << test_name
-                  << " | expected: " << expected
-                  << ", actual: " << actual << '\n';
-        ++failures;
-    } else {
-        std::cout << "[PASS] " << test_name << '\n';
-    }
-}
-
-void expect_true(const std::string& test_name, bool condition) {
-    if (!condition) {
-        std::cerr << "[FAIL] " << test_name << '\n';
-        ++failures;
-    } else {
-        std::cout << "[PASS] " << test_name << '\n';
-    }
-}
-
-template <typename Function>
-void expect_invalid_argument(
-    const std::string& test_name,
-    Function function
-) {
-    try {
-        function();
-        std::cerr << "[FAIL] " << test_name
-                  << " | expected std::invalid_argument\n";
-        ++failures;
-    } catch (const std::invalid_argument&) {
-        std::cout << "[PASS] " << test_name << '\n';
-    } catch (...) {
-        std::cerr << "[FAIL] " << test_name
-                  << " | unexpected exception type\n";
-        ++failures;
-    }
-}
+using test::expect_invalid_argument;
+using test::expect_near;
+using test::expect_true;
 
 // Test NaN, positive infinity and negative infinity
 // for every option parameter, for both call and put pricing.
@@ -212,12 +171,5 @@ int main() {
     // 5. Non-finite inputs: NaN, +infinity and -infinity
     test_non_finite_inputs();
 
-    // Final test result
-    if (failures > 0) {
-        std::cerr << failures << " test(s) failed.\n";
-        return 1;
-    }
-
-    std::cout << "All tests passed.\n";
-    return 0;
+    return test::finish();
 }
