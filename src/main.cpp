@@ -17,6 +17,8 @@ int main() {
     std::cout << "Black-Scholes European Option Pricer\n";
     std::cout << "Call price: " << quant::call_price(option) << '\n';
     std::cout << "Put price:  " << quant::put_price(option) << '\n';
+    std::cout << "Call delta: " << quant::call_delta(option) << '\n';
+    std::cout << "Put delta:  " << quant::put_delta(option) << '\n';
 
     return 0;
 }

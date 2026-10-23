@@ -254,9 +254,6 @@ int main() {
     });
 
     // 6. Non-finite inputs: NaN, +infinity and -infinity
-
-
-    // 5. Non-finite inputs: NaN, +infinity and -infinity
     test_non_finite_inputs();
 
     // Final test result
